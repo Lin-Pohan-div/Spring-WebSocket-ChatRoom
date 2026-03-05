@@ -9,17 +9,20 @@ let token = null;
 				headers: {"Content-Type":"application/json"},
 				body: JSON.stringify({
 					"email": email,
-					"passwd": passwd
+					"password": passwd      // matches Login.password
 				})
 			});
 			console.log(resp.ok);
-			if (resp.ok){
+			if (resp.ok) {
 				let data = await resp.json();
-				console.log(data);
 				token = data.token;
-				document.getElementById("status").innerHTML = "已登入(" + data.name + ")";
+				// display email if name is not provided by backend
+				document.getElementById("status").innerHTML =
+					"已登入(" + (data.name || data.email) + ")";
 				document.getElementById("chatDiv").style.display = "block";
 				connectWebSocket();
+			} else {
+				console.warn('登入失敗', resp.status);
 			}
 		};
 

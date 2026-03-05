@@ -26,6 +26,19 @@ public class AuthController {
     @Autowired // 處理加鹽
     private PasswordEncoder passwordEncoder;
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Login login) {
+        if (memberRepo.findByEmail(login.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email 已被註冊");
+        }
+        Member member = new Member();
+        member.setEmail(login.getEmail());
+        member.setPassword(passwordEncoder.encode(login.getPassword()));
+        member.setName(login.getEmail());
+        memberRepo.save(member);
+        return ResponseEntity.ok("註冊成功");
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {
         Optional<Member> member = memberRepo.findByEmail(login.getEmail());
@@ -37,7 +50,7 @@ public class AuthController {
         }
 
         // 2. 使用 PasswordEncoder 比對加密密碼
-        if (!passwordEncoder.matches(login.getPasswd(), member.get().getPasswd())) {
+        if (!passwordEncoder.matches(login.getPassword(), member.get().getPassword())) {
             System.out.println("❌ 登入失敗：密碼錯誤");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("密碼錯誤");
         }
